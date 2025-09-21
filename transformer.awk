@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 awk -v OFS='\t' -v mode="$1" '
 ###############################################################################
-# Mini Transformer in AWK — TRAINING + temperature sampling + persistence
 # - BPE TOKENIZATION (saved/loaded with model)
 # - multi-head attention (4 heads), 1 FFN, weight-tying to embeddings
 # - updates: E, P, WQ, WK, WV, W_out, W1, W2
@@ -41,7 +40,7 @@ function merge_sequence(tokens, n, pair_str, new_token,   new_tokens, new_n, i, 
 }
 
 function train_bpe(text, num_merges,    i, char, n, m, pair_parts, pair_stats, best_pair, max_freq, new_token) {
-    print "--- Starting BPE training ---"
+    print "Starting BPE training"
     V = 0
     delete token2id; delete id2token
     for (i = 1; i <= length(text); i++) {
@@ -320,7 +319,7 @@ function process_block(start,end,   block_len,t,i,j,p,loss,y,val, \
       dW_out_acc[idx(i,j,d)] += concat_head[idx(t,i,d)] * d_attn_out[idx(t,j,d)]
     }
 
-    # Backprop through WQ, WK, WV (head-specific)
+    # Backprop WQ, WK, WV (head-specific)
     for(h=0; h<n_heads; h++) {
       for(i=1;i<=d;i++) for(j=1;j<=d_head;j++){
         idx_wq = (h * d_head * d) + (i-1)*d_head + j
@@ -348,9 +347,6 @@ function process_block(start,end,   block_len,t,i,j,p,loss,y,val, \
   return loss
 }
 
-###############################################################################
-# Forward-only logits for next-token given a context (generation)
-###############################################################################
 function forward_logits_for_context(ctx_ids, L, logits, \
                                     t,i,j, X,attn_out, z, z1, y, last_t){
   # IMPORTANT: logits must be an array — never assign scalar
@@ -394,9 +390,7 @@ function forward_logits_for_context(ctx_ids, L, logits, \
   delete X; delete attn_out; delete Z1; delete Y2
 }
 
-###############################################################################
 # Saving / Loading model
-###############################################################################
 function save_model(fname,    i) {
   # truncate once
   system("sh -c '\'': > " fname "'\''")
@@ -475,9 +469,7 @@ function load_model(fname,   line, key, val, m, arr, idxv) {
   close(fname)
 }
 
-###############################################################################
 # Training / Generation control
-###############################################################################
 END{
   if (mode == "train") {
     full_text = ""

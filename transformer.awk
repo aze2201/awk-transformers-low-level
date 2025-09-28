@@ -138,7 +138,7 @@ function kaiming_init(fan_in) {
 # --------------------
 # AdamW optimizer (Complete)
 # --------------------
-function adamw_init_optimizer(    l, i) {
+function adamw_init_optimizer(l, i) {
     adam_t = 0; beta1 = 0.9; beta2 = 0.999; epsilon = 1e-8
     
     # Initialize momentum and variance for all parameters
@@ -178,7 +178,7 @@ function adamw_init_optimizer(    l, i) {
     }
 }
 
-function adamw_update(param, grad, m, v, n, decay,   i, m_hat, v_hat, update) {
+function adamw_update(param, grad, m, v, n, decay, i, m_hat, v_hat, update) {
     for (i=1; i<=n; i++) {
         if (grad[i] == 0) continue
         m[i] = beta1 * m[i] + (1 - beta1) * grad[i]
@@ -229,7 +229,7 @@ function adamw_update_all() {
     adamw_update(final_ln_beta, dfinal_ln_beta, m_final_ln_beta, v_final_ln_beta, d, 0)
 }
 
-function reset_gradients(    l) {
+function reset_gradients(l) {
     delete dE_acc; delete dP_acc
     
     for(l=1; l<=n_layers; l++) {
@@ -247,7 +247,7 @@ function reset_gradients(    l) {
 # --------------------
 # Neural Network Layers
 # --------------------
-function layernorm_forward(inp, out, gamma, beta, mean_cache, inv_std_cache, d, block_len,    t, j, sum, sum_sq, mean, var, std_dev, inv_std, val, norm_val) {
+function layernorm_forward(inp, out, gamma, beta, mean_cache, inv_std_cache, d, block_len, t, j, sum, sum_sq, mean, var, std_dev, inv_std, val, norm_val) {
     for (t=1; t<=block_len; t++) {
         sum = 0; sum_sq = 0
         for (j=1; j<=d; j++) { val = inp[idx(t,j,d)]; sum += val; sum_sq += val*val }
@@ -260,7 +260,7 @@ function layernorm_forward(inp, out, gamma, beta, mean_cache, inv_std_cache, d, 
     }
 }
 
-function layernorm_backward(d_out, inp, d_inp, gamma, d_gamma, d_beta, mean_cache, inv_std_cache, d, block_len,    t, j, d_norm_val, sum_d_norm, sum_d_norm_x_norm, mean, inv_std, norm_val) {
+function layernorm_backward(d_out, inp, d_inp, gamma, d_gamma, d_beta, mean_cache, inv_std_cache, d, block_len, t, j, d_norm_val, sum_d_norm, sum_d_norm_x_norm, mean, inv_std, norm_val) {
     for(j=1;j<=d;j++) { d_gamma[j]=0; d_beta[j]=0 }
     
     for (t=1; t<=block_len; t++) {
@@ -285,7 +285,7 @@ function layernorm_backward(d_out, inp, d_inp, gamma, d_gamma, d_beta, mean_cach
     }
 }
 
-function multihead_attention_forward(l, inp, block_len, cache,    h, t, k, j, i, val, maxs, den, Q_h, K_h, V_h, d_head, score, prob, ctx_hj, out_val) {
+function multihead_attention_forward(l, inp, block_len, cache, h, t, k, j, i, val, maxs, den, Q_h, K_h, V_h, d_head, score, prob, ctx_hj, out_val) {
     d_head = d/n_heads
     
     for(i=1;i<=block_len*d;i++) attn_out[i] = 0
@@ -356,7 +356,7 @@ function multihead_attention_forward(l, inp, block_len, cache,    h, t, k, j, i,
     }
 }
 
-function multihead_attention_backward(l, d_attn_out, inp, d_inp, cache, block_len,    h, t, k, j, i, d_C, d_V, d_P, d_S, d_Q, d_K, d_head, sum_d_P, d_val) {
+function multihead_attention_backward(l, d_attn_out, inp, d_inp, cache, block_len, h, t, k, j, i, d_C, d_V, d_P, d_S, d_Q, d_K, d_head, sum_d_P, d_val) {
     d_head = d/n_heads
     
     # Initialize gradient arrays
@@ -452,7 +452,7 @@ function multihead_attention_backward(l, d_attn_out, inp, d_inp, cache, block_le
     }
 }
 
-function ffn_forward(l, inp, block_len, cache,  t, j, i, z1, y2_ffn) {
+function ffn_forward(l, inp, block_len, cache, t, j, i, z1, y2_ffn) {
     # FFN intermediate layer with GELU
     for(t=1; t<=block_len; t++) {
         for(j=1; j<=d_ff; j++) {
@@ -473,7 +473,7 @@ function ffn_forward(l, inp, block_len, cache,  t, j, i, z1, y2_ffn) {
     }
 }
 
-function ffn_backward(l, d_ffn_out, inp, d_inp, cache, block_len,    t, j, i, d_gelu, d_z1) {
+function ffn_backward(l, d_ffn_out, inp, d_inp, cache, block_len, t, j, i, d_gelu, d_z1) {
     # Initialize gradients
     for(j=1; j<=d_ff; j++) db1s_acc[l,j] = 0
     for(j=1; j<=d; j++) db2s_acc[l,j] = 0
@@ -514,7 +514,7 @@ function ffn_backward(l, d_ffn_out, inp, d_inp, cache, block_len,    t, j, i, d_
     }
 }
 
-function dropout_forward(inp, out, d, block_len, p, mask,   t, j) {
+function dropout_forward(inp, out, d, block_len, p, mask, t, j) {
     if (mode == "generate" || p == 0) {
         for(t=1; t<=block_len*d; t++) out[t] = inp[t]
         return
@@ -533,7 +533,7 @@ function dropout_backward(d_out, d_inp, mask, n,   i) {
 # --------------------
 # Learning Rate Scheduler
 # --------------------
-function get_lr(step,    pi, decay_ratio) {
+function get_lr(step, pi, decay_ratio) {
     if (warmup_steps > 0 && step < warmup_steps) {
         return max_lr * step / warmup_steps
     }
@@ -573,7 +573,7 @@ BEGIN{
 ###############################################################################
 # Forward + backprop for a single block (Complete)
 ###############################################################################
-function process_block(start,end, is_training,    block_len, t, j, i, loss, y, m, den, py_log, g, l, z1, y2_ffn) {
+function process_block(start,end, is_training, block_len, t, j, i, loss, y, m, den, py_log, g, l, z1, y2_ffn) {
     block_len = end - start + 1
     if (is_training) reset_gradients()
 
@@ -696,7 +696,7 @@ function process_block(start,end, is_training,    block_len, t, j, i, loss, y, m
     return loss/block_len
 }
 
-function forward_logits_for_context(ctx_ids, L, logits_out,    t, j, i, l, z1, y2_ffn, last_t) {
+function forward_logits_for_context(ctx_ids, L, logits_out, t, j, i, l, z1, y2_ffn, last_t) {
     for(t=1;t<=L;t++) for(j=1;j<=d;j++) X[idx(t,j,d)] = E[idx(ctx_ids[t],j,d)] + P[idx(t,j,d)]
     
     for(l=1; l<=n_layers; l++) {
@@ -719,7 +719,7 @@ function forward_logits_for_context(ctx_ids, L, logits_out,    t, j, i, l, z1, y
 }
 
 # Saving / Loading model
-function save_model(fname,    i, l) {
+function save_model(fname, i, l) {
     printf "" > fname
     print "V=" V >> fname; print "d=" d >> fname; print "d_ff=" d_ff >> fname
     print "n_heads=" n_heads >> fname; print "n_layers=" n_layers >> fname
@@ -743,10 +743,10 @@ function save_model(fname,    i, l) {
     dump_array("final_ln_gamma", final_ln_gamma, d, fname)
     dump_array("final_ln_beta", final_ln_beta, d, fname)
 }
-function dump_array(name, A, n, fname,  i){ for (i=1;i<=n;i++) print name "[" i "]=" A[i] >> fname }
-function dump_layered_array(name, A, l, n, fname,  i){ for (i=1;i<=n;i++) print name "[" l "," i "]=" A[l,i] >> fname }
+function dump_array(name, A, n, fname, i){ for (i=1;i<=n;i++) print name "[" i "]=" A[i] >> fname }
+function dump_layered_array(name, A, l, n, fname, i){ for (i=1;i<=n;i++) print name "[" l "," i "]=" A[l,i] >> fname }
 
-function load_model(fname,   line, key, val, kv, m, arr, l, idxv) {
+function load_model(fname, line, key, val, kv, m, arr, l, idxv) {
     while((getline line < fname) > 0){
         if (line ~ /^[#[:space:]]*$/) continue
         if (split(line, kv, "=") < 2) continue

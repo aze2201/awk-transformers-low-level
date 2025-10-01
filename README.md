@@ -1251,5 +1251,4 @@ This dynamic weighting allows the model to understand the different meanings and
 
 ## Conclusion
 
-This documentation provides a thorough exploration of the GPT-2 style transformer implemented in AWK. From the foundational BPE tokenization to the intricate details of multi-head self-attention, feed-forward networks, layer normalization, and the AdamW optimization algorithm, each component has been explained with clarity and supported by mathematical formulations. The provided flowcharts and function-level details aim to offer a complete understanding of this unique and educational implementation. While AWK may not be the conventional choice for deep learning, this project demonstrates its surprising capability and serves as an excellent learning resource for the underlying principles of transformer models.
-
+This documentation provides a thorough exploration of the GPT-2 style transformer implemented in AWK. From the foundational BPE tokenization to the intricate details of multi-head self-attention, feed-forward networks, layer normalization, and the AdamW optimization algorithm, each component has been explained with clarity and supported by mathematical formulations. The provided flowcharts and function-level details aim to offer a complete understanding of this unique and educational implementation. 

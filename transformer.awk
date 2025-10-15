@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 awk -v OFS='\t' -v mode="$1" '
 ###############################################################################
-# GPT-2 style Transformer in AWK (Complete Implementation)
+# GPT-2 style Transformer in AWK
 # - Complete backpropagation through all layers
 # - GELU activation, proper weight initialization
 # - Full AdamW optimizer for all parameters
@@ -21,7 +21,7 @@ function tanh(x) {
 
 
 
-function get_pair_stats(tokens, n,    stats, i, pair) {
+function get_pair_stats(tokens, n, stats, i, pair) {
     delete stats
     for (i = 1; i < n; i++) {
         pair = tokens[i] OFS tokens[i+1]
@@ -29,7 +29,7 @@ function get_pair_stats(tokens, n,    stats, i, pair) {
     }
 }
 
-function merge_sequence(tokens, n, pair_str, new_token,   new_tokens, new_n, i, p1, p2, pair_parts) {
+function merge_sequence(tokens, n, pair_str, new_token, new_tokens, new_n, i, p1, p2, pair_parts) {
     split(pair_str, pair_parts, OFS)
     p1 = pair_parts[1]; p2 = pair_parts[2]
     new_n = 0; i = 1
@@ -44,7 +44,7 @@ function merge_sequence(tokens, n, pair_str, new_token,   new_tokens, new_n, i, 
     return new_n
 }
 
-function train_bpe(text, num_merges,    i, char, n, m, pair_parts, pair_stats, best_pair, max_freq, new_token) {
+function train_bpe(text, num_merges, i, char, n, m, pair_parts, pair_stats, best_pair, max_freq, new_token) {
     print "Starting BPE training"
     V = 0
     delete token2id; delete id2token
@@ -73,7 +73,7 @@ function train_bpe(text, num_merges,    i, char, n, m, pair_parts, pair_stats, b
     print "--- BPE training finished. Final vocab size:", V, " Merges:", num_ranked_merges, "---"
 }
 
-function tokenize_bpe(text, seq_out,    n, i, m, new_n, p1, p2, new_tok, tokens, new_tokens, T) {
+function tokenize_bpe(text, seq_out, n, i, m, new_n, p1, p2, new_tok, tokens, new_tokens, T) {
     n = 0
     for(i=1; i<=length(text); i++) { n++; tokens[n] = substr(text, i, 1) }
 
@@ -105,19 +105,19 @@ function tokenize_bpe(text, seq_out,    n, i, m, new_n, p1, p2, new_tok, tokens,
 # Math functions and helpers
 # --------------------
 function idx(i,j,cols) { return (i-1)*cols + j }
-function dot_row(A,ri,B,rj,d,   s,k){ s=0; for(k=1;k<=d;k++) s+=A[idx(ri,k,d)]*B[idx(rj,k,d)]; return s }
-function clamp_inplace(A,n,val,   i){ for(i=1;i<=n;i++){ if(A[i]>val)A[i]=val; else if(A[i]<-val)A[i]=-val } }
+function dot_row(A,ri,B,rj,d, s,k){ s=0; for(k=1;k<=d;k++) s+=A[idx(ri,k,d)]*B[idx(rj,k,d)]; return s }
+function clamp_inplace(A,n,val, i){ for(i=1;i<=n;i++){ if(A[i]>val)A[i]=val; else if(A[i]<-val)A[i]=-val } }
 function safe_exp(x){ if (x < -700) return 0; return exp(x) }
 function safe_div(a,b){ return (b==0) ? 0 : a/b }
 
 # GELU activation function (Gaussian Error Linear Unit)
-function gelu(x,    pi, cdf) {
+function gelu(x, pi, cdf) {
     pi = 3.141592653589793
     # Approximation of Gaussian CDF: 0.5 * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x^3)))
     return 0.5 * x * (1 + tanh(sqrt(2/pi) * (x + 0.044715 * x*x*x)))
 }
 
-function gelu_derivative(x,    pi, x3, tanh_arg, sech2) {
+function gelu_derivative(x, pi, x3, tanh_arg, sech2) {
     pi = 3.141592653589793
     x3 = x*x*x
     tanh_arg = sqrt(2/pi) * (x + 0.044715 * x3)
@@ -194,7 +194,7 @@ function adamw_update(param, grad, m, v, n, decay, i, m_hat, v_hat, update) {
 function adamw_update_all() {
     adam_t++
     
-    # Update embeddings and positional encodings
+    # Update embeddings and positional embeddings
     adamw_update(E, dE_acc, m_E, v_E, V*d, 1)
     adamw_update(P, dP_acc, m_P, v_P, block_size*d, 1)
     
@@ -379,7 +379,7 @@ function multihead_attention_backward(l, d_attn_out, inp, d_inp, cache, block_le
         }
     }
     
-    # Gradient through attention computation (simplified)
+    # Gradient through attention computation 
     for (h=0; h<n_heads; h++) {
         for (t=1; t<=block_len; t++) {
             for (k=1; k<=t; k++) {
@@ -526,7 +526,7 @@ function dropout_forward(inp, out, d, block_len, p, mask, t, j) {
     }
 }
 
-function dropout_backward(d_out, d_inp, mask, n,   i) {
+function dropout_backward(d_out, d_inp, mask, n, i) {
     for (i=1; i<=n; i++) d_inp[i] = d_out[i] * mask[i]
 }
 
